@@ -6,9 +6,7 @@ type InputProps = ComponentProps<typeof InputField>
 export const Input = ({...rest}:InputProps) => {
   return (
     <GluestackInput 
-      bg='$gray700' 
       h='$14' 
-      px='$4' 
       borderWidth='$0' 
       borderRadius='$md'
       $focus={{
@@ -17,6 +15,8 @@ export const Input = ({...rest}:InputProps) => {
       }}
     >
       <InputField
+        px='$4' 
+        bg='$gray700' 
         color='$white'
         fontFamily='$body'
         placeholderTextColor='$gray300' 
