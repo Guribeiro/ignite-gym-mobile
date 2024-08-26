@@ -1,17 +1,19 @@
 import {ComponentProps} from 'react'
-import {Input as GluestackInput, InputField} from '@gluestack-ui/themed'
+import {Input as GluestackInput, InputField, Text} from '@gluestack-ui/themed'
 
-type InputProps = ComponentProps<typeof InputField>
+type InputProps = ComponentProps<typeof InputField> & {
+  error?: string
+}
 
-export const Input = ({...rest}:InputProps) => {
+export const Input = ({error, ...rest}:InputProps) => {
   return (
     <GluestackInput 
       h='$14' 
-      borderWidth='$0' 
+      borderWidth='$1' 
       borderRadius='$md'
+      borderColor={error ? '$red500' : '$gray700'}
       $focus={{
         borderColor: '$green300',
-        borderWidth: 1
       }}
     >
       <InputField
@@ -22,6 +24,18 @@ export const Input = ({...rest}:InputProps) => {
         placeholderTextColor='$gray300' 
         {...rest}
       />
+      {error && (
+        <Text 
+        position='absolute' 
+        right='$2' 
+        bottom='$2' 
+        fontSize={'$xs'}
+        color='$red500'
+        >
+         {error}
+       </Text>
+      )}
+     
     </GluestackInput>
   )
 }  

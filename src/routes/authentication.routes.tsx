@@ -1,5 +1,5 @@
 import { View } from '@gluestack-ui/themed';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { createNativeStackNavigator, NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Signin } from '@screens/signin';
 import { Signup } from '@screens/signup';
 
@@ -7,6 +7,9 @@ export type RootAuthenticationRoutesParamsList = {
   Signin: undefined
   Signup: undefined
 }
+
+export type AuthenticationNavigatorProps = NativeStackNavigationProp<RootAuthenticationRoutesParamsList>;
+
 
 const { Navigator, Screen } = createNativeStackNavigator<RootAuthenticationRoutesParamsList>()
 

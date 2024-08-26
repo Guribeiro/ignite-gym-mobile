@@ -1,21 +1,36 @@
 import { Center, Heading, Image, Text, VStack, ScrollView } from "@gluestack-ui/themed"
-import backgroundImage from '@assets/background.png'
-import Logo from '@assets/logo.svg'
+import { useNavigation } from "@react-navigation/native"
+
+import {Controller, useForm} from 'react-hook-form'
+import {zodResolver} from '@hookform/resolvers/zod'
+import {z} from 'zod'
+
+import { AuthenticationNavigatorProps} from "@routes/authentication.routes"
 
 import { Input } from "@components/input"
 import { Button } from "@components/button"
-import { NativeStackNavigationProp } from "@react-navigation/native-stack"
-import { RootAuthenticationRoutesParamsList } from "@routes/authentication.routes"
-import { useNavigation } from "@react-navigation/native"
 
-type SigninScreenProps = NativeStackNavigationProp<
-  RootAuthenticationRoutesParamsList,
-  'Signin'
->;
+import backgroundImage from '@assets/background.png'
+import Logo from '@assets/logo.svg'
 
+const signinSchema = z.object({
+  email: z.string().email(),
+  password: z.string().min(8)
+})
+
+type SigninFormData = z.infer<typeof signinSchema>
 
 export const Signin = () => {
-  const {navigate} = useNavigation<SigninScreenProps>()
+  const {navigate} = useNavigation<AuthenticationNavigatorProps>()
+
+  const {control, handleSubmit} = useForm<SigninFormData>({
+    resolver: zodResolver(signinSchema)
+  })
+
+  const onSubmit = ({email, password}:SigninFormData) => {
+    console.log({email, password})
+  }
+
   return (
     <ScrollView contentContainerStyle={{flexGrow: 1}} showsVerticalScrollIndicator={false}>
       <VStack flex={1} bg='$gray700'>
@@ -27,16 +42,41 @@ export const Signin = () => {
           alt="Pessoas treinando"
           position="absolute"
         />
-        <VStack flex={1} px='$10' pb='$16'>
+        <VStack flex={1} px='$4' pb='$16'>
           <Center my='$24'>
             <Logo />
             <Text color='$gray100' fontSize='$sm'>Treine sua mente e seu corpo</Text>
           </Center>
           <Center gap='$2'>
             <Heading color="$gray100">Acesse sua conta</Heading>
-            <Input placeholder="Email" keyboardType="email-address" autoCapitalize="none" />
-            <Input placeholder="Senha" secureTextEntry />
-            <Button title='Acessar' />
+            <Controller 
+              control={control}
+              name='email'
+              render={({field: {onChange, value}, fieldState: {error}}) => (
+                <Input 
+                  placeholder="Email" 
+                  keyboardType="email-address" 
+                  autoCapitalize="none"
+                  onChangeText={onChange}
+                  value={value}
+                  error={error?.message}
+                />
+              )}
+            />
+            <Controller 
+              control={control}
+              name='password'
+              render={({field: {onChange, value}, fieldState: {error}}) => (
+                <Input 
+                  placeholder="Senha" 
+                  secureTextEntry
+                  onChangeText={onChange}
+                  value={value}
+                  error={error?.message}
+                />
+              )}
+            />
+            <Button title='Acessar' onPress={handleSubmit(onSubmit)} />
           </Center>
           <Center gap='$2' flex={1} justifyContent="flex-end" mt='$4'>
             <Text color='$gray100' fontSize='$sm'>Ainda não tem acesso?</Text>

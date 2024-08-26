@@ -1,18 +1,53 @@
 import { useState } from "react";
-import { Center, Heading, ScrollView, Text, VStack, useToast } from "@gluestack-ui/themed"
+import { TouchableOpacity } from "react-native";
+import { 
+  Center, 
+  Heading, 
+  ScrollView, 
+  Text, 
+  VStack, 
+  useToast
+} from "@gluestack-ui/themed"
 import * as FileSystem from 'expo-file-system';
 import * as ImagePicker from 'expo-image-picker';
-import { Header } from "@components/header";
-import { UserAvatar } from "@components/user-avatar";
-import { Alert, TouchableOpacity } from "react-native";
+import {Controller, useForm} from 'react-hook-form'
+import {zodResolver} from '@hookform/resolvers/zod'
+import {z} from 'zod'
+
 import { Input } from "@components/input";
+import { Header } from "@components/header";
 import { Button } from "@components/button";
-import DefaultAvatarPng from '@assets/userPhotoDefault.png'
+import { UserAvatar } from "@components/user-avatar";
 import { ToastMessage } from "@components/toast-message";
+
+import DefaultAvatarPng from '@assets/userPhotoDefault.png'
+
+const profileSchema = z.object({
+  name: z.string().min(4),
+  email: z.string().email(),
+  password_old: z.string().min(8),
+  password: z.string().min(8),
+  password_confirm: z.string().min(8)
+}).refine(({password, password_confirm}) => {
+  return password === password_confirm
+}, {
+  message: "Don't match",
+  path: ['password_confirm'],
+})
+
+type ProfileFormData = z.infer<typeof profileSchema>
 
 export const Profile = () => {
   const [userAvatar, setUserAvatar] = useState<string>()
   const toast = useToast()
+
+  const {control, handleSubmit} = useForm<ProfileFormData>({
+    resolver: zodResolver(profileSchema)
+  })
+
+  const onSubmit = ({name, email, password, password_confirm}:ProfileFormData) => {
+    console.log({name, email, password, password_confirm})
+  }
 
   const userPhotoSelect = async () => {
     try {
@@ -72,17 +107,83 @@ export const Profile = () => {
           <VStack flex={1} px='$4' pb='$4'>
             <VStack gap='$8' mt='$12'>
               <VStack gap='$4'>
-                <Input placeholder="Nome" bg='$gray600'/>
-                <Input placeholder="Email" bg='$gray600' />
+                <Controller 
+                  control={control}
+                  name='name'
+                  render={({field: {onChange, value}, fieldState: {error}}) => (
+                    <Input 
+                      placeholder="Nome" 
+                      bg='$gray600'
+                      autoCapitalize="words" 
+                      onChangeText={onChange}
+                      value={value}
+                      error={error?.message}
+                    />
+                  )}
+                />
+                <Controller 
+                  control={control}
+                  name='email'
+                  render={({field: {onChange, value}, fieldState: {error}}) => (
+                    <Input 
+                      placeholder="Email" 
+                      keyboardType="email-address" 
+                      bg='$gray600'
+                      autoCapitalize="none"
+                      onChangeText={onChange}
+                      value={value}
+                      error={error?.message}
+                    />
+                  )}
+                />
               </VStack>
               <VStack gap='$4'>
                 <Heading color='$gray100'>Alterar senha</Heading>
-                <Input placeholder="Senha antiga" bg='$gray600' secureTextEntry/>
-                <Input placeholder="Nova senha" bg='$gray600' secureTextEntry />
-                <Input placeholder="Confirmar nova senha" bg='$gray600' secureTextEntry />
+                <Controller 
+                  control={control}
+                  name='password_old'
+                  render={({field: {onChange, value}, fieldState: {error}}) => (
+                    <Input 
+                      placeholder="Senha antiga" 
+                      secureTextEntry
+                      bg='$gray600'
+                      onChangeText={onChange}
+                      value={value}
+                      error={error?.message}
+                    />
+                  )}
+                />
+                <Controller 
+                  control={control}
+                  name='password'
+                  render={({field: {onChange, value}, fieldState: {error}}) => (
+                    <Input 
+                      placeholder="Nova senha" 
+                      bg='$gray600' 
+                      secureTextEntry
+                      onChangeText={onChange}
+                      value={value}
+                      error={error?.message}
+                    />
+                  )}
+                />
+                <Controller 
+                  control={control}
+                  name='password_confirm'
+                  render={({field: {onChange, value}, fieldState: {error}}) => (
+                    <Input 
+                      placeholder="Confirmar senha" 
+                      bg='$gray600' 
+                      secureTextEntry
+                      onChangeText={onChange}
+                      value={value}
+                      error={error?.message}
+                    />
+                  )}
+                />
               </VStack>
             </VStack>
-            <Button mt='$12' title="Atualizar"/>
+            <Button mt='$12' title="Atualizar" onPress={handleSubmit(onSubmit)}/>
           </VStack>
         </ScrollView>
       </VStack>
