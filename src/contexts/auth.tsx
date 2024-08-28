@@ -45,8 +45,6 @@ type AuthProviderProps = {
   children: ReactNode
 }
 
-
-
 const AuthContext = createContext<AuthContextData>({} as AuthContextData)
 
 const AuthProvider = ({children}:AuthProviderProps ) => {
@@ -140,6 +138,14 @@ const AuthProvider = ({children}:AuthProviderProps ) => {
   useEffect(() => {
     fetchStoragedAuthentication()
   },[])
+
+  useEffect(() => {
+    const subscribe = api.registerInterceptTokenManager(signout);
+
+    return () => {
+      subscribe()
+    }
+  },[signout])
 
   return (
     <AuthContext.Provider value={{
