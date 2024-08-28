@@ -4,10 +4,11 @@ import * as SplashScreen from 'expo-splash-screen';
 import { loadAsync } from 'expo-font';
 import { Roboto_400Regular, Roboto_700Bold } from '@expo-google-fonts/roboto'
 import { SafeAreaProvider } from 'react-native-safe-area-context';
-import { GluestackUIProvider, View} from '@gluestack-ui/themed'
+import { GluestackUIProvider} from '@gluestack-ui/themed'
 import { config } from '@config/gluestack-ui.config'
 import { Routes } from '@routes/index';
 
+import { AuthProvider } from '@contexts/auth';
 
 export default function App() {
   const [appIsReady, setAppIsReady] = useState(false);
@@ -46,7 +47,9 @@ export default function App() {
     <SafeAreaProvider onLayout={onLayoutRootView}>
       <GluestackUIProvider config={config}>
         <StatusBar style="auto" translucent />
+        <AuthProvider>
           <Routes />
+        </AuthProvider>
       </GluestackUIProvider>
     </SafeAreaProvider>
   );

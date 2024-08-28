@@ -1,0 +1,1 @@
+export const AUTHENTICATION_STORAGE_KEY = '@ignitegym:authentication'

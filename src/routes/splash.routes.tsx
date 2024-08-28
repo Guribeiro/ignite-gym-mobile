@@ -3,6 +3,7 @@ import { Splash } from '@screens/splash';
 
 import { AppRoutes } from '@routes/app.routes';
 import { AuthenticationRoutes } from './authentication.routes';
+import { useAuthentication } from '@contexts/auth';
 
 
 export type RootSplashParamsList = {
@@ -13,8 +14,7 @@ export type RootSplashParamsList = {
 const { Navigator, Screen } = createNativeStackNavigator<RootSplashParamsList>()
 
 export const SplashRoutes = () =>{
-  const user = true
-
+  const {authentication} = useAuthentication()
   return (
     <Navigator
       initialRouteName='Splash'
@@ -29,7 +29,7 @@ export const SplashRoutes = () =>{
       
       <Screen 
         name='App'
-        component={!user ? AuthenticationRoutes  : AppRoutes }
+        component={!authentication.token ? AuthenticationRoutes  : AppRoutes }
       />
     </Navigator>
   )

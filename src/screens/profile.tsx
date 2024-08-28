@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { TouchableOpacity } from "react-native";
 import { 
   Center, 
@@ -21,15 +21,22 @@ import { UserAvatar } from "@components/user-avatar";
 import { ToastMessage } from "@components/toast-message";
 
 import DefaultAvatarPng from '@assets/userPhotoDefault.png'
+import { useAuthentication } from "@contexts/auth";
+import { api } from "../api";
+import { AppError } from "../errors/app-error";
 
 const profileSchema = z.object({
   name: z.string().min(4),
   email: z.string().email(),
-  password_old: z.string().min(8),
-  password: z.string().min(8),
-  password_confirm: z.string().min(8)
-}).refine(({password, password_confirm}) => {
-  return password === password_confirm
+  old_password: z.string().optional(),
+  password: z.string().optional(),
+  password_confirm: z.string().optional()
+})
+.refine(({password, password_confirm}) => {
+  if(password !== password_confirm){
+    return password === password_confirm
+  }
+  return true
 }, {
   message: "Don't match",
   path: ['password_confirm'],
@@ -39,14 +46,64 @@ type ProfileFormData = z.infer<typeof profileSchema>
 
 export const Profile = () => {
   const [userAvatar, setUserAvatar] = useState<string>()
+  const [loading, setLoading] = useState(false)
+
   const toast = useToast()
+  const {authentication, updateUserProfile} = useAuthentication()
+
+  const { user } = authentication
 
   const {control, handleSubmit} = useForm<ProfileFormData>({
+    defaultValues: {
+      name: user.name,
+      email: user.email
+    },
     resolver: zodResolver(profileSchema)
   })
 
-  const onSubmit = ({name, email, password, password_confirm}:ProfileFormData) => {
-    console.log({name, email, password, password_confirm})
+  const onSubmit = async ({name, password, old_password}:ProfileFormData) => {
+    try {
+      setLoading(true)
+      user.name = name
+      await api.put('/users', {
+        name,
+        password,
+        old_password
+      })
+
+      toast.show({
+        placement: 'top',
+        render: ({id}) => (
+          <ToastMessage 
+            id={`toast-${id}`} 
+            title={'Sucesso!!'}
+            description="Seu perfil foi atualizado com sucesso" 
+            action={'success'}
+            onClose={() => toast.close(id)}
+          />
+        )
+      })
+
+      await updateUserProfile(user)
+      
+    } catch (error) {
+      const isAppError = error instanceof AppError
+      const title = isAppError ? error.message : 'Nao foi possivel concluir a requisicao. Tente novamente mais tarde'
+
+      toast.show({
+        placement: 'top',
+        render: ({id}) => (
+          <ToastMessage 
+            id={`toast-${id}`} 
+            title={title} 
+            action={'error'}
+            onClose={() => toast.close(id)}
+          />
+        )
+      })
+    }finally {
+      setLoading(false)
+    }  
   }
 
   const userPhotoSelect = async () => {
@@ -86,7 +143,7 @@ export const Profile = () => {
       console.log(error)
     }
   }
-
+ 
   return (
       <VStack flex={1}>
         <Header title='Perfil' />
@@ -141,7 +198,7 @@ export const Profile = () => {
                 <Heading color='$gray100'>Alterar senha</Heading>
                 <Controller 
                   control={control}
-                  name='password_old'
+                  name='old_password'
                   render={({field: {onChange, value}, fieldState: {error}}) => (
                     <Input 
                       placeholder="Senha antiga" 
@@ -183,7 +240,7 @@ export const Profile = () => {
                 />
               </VStack>
             </VStack>
-            <Button mt='$12' title="Atualizar" onPress={handleSubmit(onSubmit)}/>
+            <Button mt='$12' title="Atualizar" onPress={handleSubmit(onSubmit)} loading={loading} disabled={loading}/>
           </VStack>
         </ScrollView>
       </VStack>

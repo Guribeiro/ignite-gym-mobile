@@ -11,11 +11,15 @@ import { Profile } from '@screens/profile';
 import { History } from '@screens/history';
 import { Exercise } from '@screens/exercise';
 
+export type ExerciseParamsList = {
+  exercise_id: number
+}
+
 export type RootAppParamsList = {
   Home: undefined
   Profile: undefined
   History: undefined
-  Exercise: undefined
+  Exercise: ExerciseParamsList
 }
 
 const {Navigator, Screen} = createBottomTabNavigator<RootAppParamsList>()

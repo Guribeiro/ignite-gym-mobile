@@ -1,8 +1,26 @@
 import { Heading, HStack, Image, VStack, Text } from "@gluestack-ui/themed"
 import {CaretRight} from 'phosphor-react-native'
 import {config} from '@config/gluestack-ui.config'
+import { api, baseURL } from "../api"
 
-export const Exercise = () => {
+export type ExerciseDTO = {
+  id: number
+  name: string
+  series: number
+  repetitions: string
+  thumb: string
+  demo: string
+  group: string
+  created_at: string
+  updated_at: string
+}
+
+
+interface ExerciseProps {
+  exercise: ExerciseDTO
+}
+
+export const Exercise = ({exercise}: ExerciseProps) => {
   const {colors} = config.tokens
   return  (
     <HStack 
@@ -14,7 +32,7 @@ export const Exercise = () => {
     >
       <HStack gap='$4' alignItems="center">
         <Image 
-          source={{uri: `https://global.cdn.magazord.com.br/epulari/img/2021/12/blog/6445/blog-puxada-frontal.jpg`}} 
+          source={{uri: `${api.defaults.baseURL}/exercise/thumb/${exercise.thumb}`}} 
           alt='Remada frontal'
           rounded='$md'
           h='$16'
@@ -22,8 +40,8 @@ export const Exercise = () => {
           resizeMode="cover"
         />
         <VStack>
-          <Heading color='$gray100'>Puxada frontal</Heading>
-          <Text numberOfLines={2}>3 séries x 12 repetições</Text>
+          <Heading color='$gray100'>{exercise.name}</Heading>
+          <Text numberOfLines={2}>{exercise.series} x {exercise.repetitions}</Text>
         </VStack>
       </HStack>
       <CaretRight color={colors.gray100} />

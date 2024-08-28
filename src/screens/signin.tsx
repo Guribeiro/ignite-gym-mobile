@@ -1,4 +1,4 @@
-import { Center, Heading, Image, Text, VStack, ScrollView } from "@gluestack-ui/themed"
+import { Center, Heading, Image, Text, VStack, ScrollView, useToast } from "@gluestack-ui/themed"
 import { useNavigation } from "@react-navigation/native"
 
 import {Controller, useForm} from 'react-hook-form'
@@ -12,6 +12,9 @@ import { Button } from "@components/button"
 
 import backgroundImage from '@assets/background.png'
 import Logo from '@assets/logo.svg'
+import { useAuthentication } from "@contexts/auth"
+import { AppError } from "../errors/app-error"
+import { ToastMessage } from "@components/toast-message"
 
 const signinSchema = z.object({
   email: z.string().email(),
@@ -22,13 +25,35 @@ type SigninFormData = z.infer<typeof signinSchema>
 
 export const Signin = () => {
   const {navigate} = useNavigation<AuthenticationNavigatorProps>()
+  const {signin, loading} = useAuthentication()
+  const toast = useToast()
 
   const {control, handleSubmit} = useForm<SigninFormData>({
     resolver: zodResolver(signinSchema)
   })
 
-  const onSubmit = ({email, password}:SigninFormData) => {
-    console.log({email, password})
+  const onSubmit = async ({email, password}:SigninFormData) => {
+    try {
+      await signin({
+        email, 
+        password
+      })
+    } catch (error) {
+      const isAppError = error instanceof AppError
+      const title = isAppError ? error.message : 'Nao foi possivel concluir a requisicao. Tente novamente mais tarde'
+
+      toast.show({
+        placement: 'top',
+        render: ({id}) => (
+          <ToastMessage 
+            id={`toast-${id}`} 
+            title={title} 
+            action={'error'}
+            onClose={() => toast.close(id)}
+          />
+        )
+      })
+    }
   }
 
   return (
@@ -76,7 +101,7 @@ export const Signin = () => {
                 />
               )}
             />
-            <Button title='Acessar' onPress={handleSubmit(onSubmit)} />
+            <Button title='Acessar' onPress={handleSubmit(onSubmit)} disabled={loading} loading={loading}  />
           </Center>
           <Center gap='$2' flex={1} justifyContent="flex-end" mt='$4'>
             <Text color='$gray100' fontSize='$sm'>Ainda não tem acesso?</Text>

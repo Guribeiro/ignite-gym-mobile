@@ -6,7 +6,7 @@ import {X} from 'phosphor-react-native'
 
 const {colors} = config.tokens
 
-type Action = 'success' | 'error' | 'warn'
+export type Action = 'success' | 'error'
 
 type Props = ComponentProps<typeof Toast> & {
   id: string
@@ -26,9 +26,6 @@ const variations: Record<Action, StylesVariations> = {
   },
   success: {
     bgColor: colors.green500
-  },
-  warn: {
-    bgColor: colors.yellow500
   }
 }
 
@@ -39,8 +36,8 @@ export const ToastMessage = ({id, title, description, action, onClose, ...rest}:
         <Pressable alignSelf='flex-end' onPress={onClose}>
           <X color={colors.gray100} />
         </Pressable>
-        <ToastTitle color='$gray100' fontFamily='$heading'>{title}</ToastTitle>
-        <ToastDescription color='$gray200'>{description}</ToastDescription>
+        <ToastTitle color='$white' fontFamily='$heading'>{title}</ToastTitle>
+        <ToastDescription color='$white'>{description}</ToastDescription>
       </VStack>
     </Toast>
   )
