@@ -114,7 +114,12 @@ export const Home = () => {
       <StatusBar style="inverted" translucent />
       <HStack px='$4' pt='$16' pb='$5' bg='$gray600' alignItems="center" justifyContent="space-between">
         <HStack gap={4} alignItems="center" >
-          <UserAvatar source={authentication.user.avatar ? {uri:  authentication.user.avatar }: userPhotoDefault} alt='user avatar' />
+          <UserAvatar 
+            source={authentication.user.avatar ? 
+              {uri:  `${api.defaults.baseURL}/avatar/${authentication.user.avatar}` }
+              : userPhotoDefault} 
+            alt='user avatar' 
+          />
           <VStack>
             <Text color="$white">Olá,</Text>
             <Heading color="$white">{authentication.user.name}</Heading>
